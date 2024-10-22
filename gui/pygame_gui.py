@@ -80,7 +80,6 @@ class PygameGUI(CrosswordEditor):
         in_normal_mode = self.mode == EditorModes.NORMAL
         
         square_not_filled = lambda x, y: not self.matrix[x, y].filled
-        square_is_filled = lambda x, y: self.matrix[x, y].filled
         
         if can_type and not ctrl_pressed and typed_letter:
             if in_normal_mode:
@@ -152,28 +151,28 @@ class PygameGUI(CrosswordEditor):
             case pygame.K_UP:
                 if in_normal_mode:
                     self.cursor.going_down = True
-                    self.cursor.shift_until(-1, square_is_filled)
+                    self.cursor.shift_until(-1, square_not_filled)
                 else:
                     self.cursor.change_position(-1, 0)
                     
             case pygame.K_DOWN:
                 if in_normal_mode:
                     self.cursor.going_down = True
-                    self.cursor.shift_until(1, square_is_filled)
+                    self.cursor.shift_until(1, square_not_filled)
                 else:
                     self.cursor.change_position(1, 0)
                     
             case pygame.K_LEFT:
                 if in_normal_mode:
                     self.cursor.going_down = False
-                    self.cursor.shift_until(-1, square_is_filled)
+                    self.cursor.shift_until(-1, square_not_filled)
                 else:
                     self.cursor.change_position(0, -1)
                     
             case pygame.K_RIGHT:
                 if in_normal_mode:
                     self.cursor.going_down = False
-                    self.cursor.shift_until(1, square_is_filled)
+                    self.cursor.shift_until(1, square_not_filled)
                 else:
                     self.cursor.change_position(0, 1)
             
@@ -233,9 +232,9 @@ class PygameGUI(CrosswordEditor):
             case pygame.K_UP:
                 self.cursor.going_down = True
                 if self.cursor.check(-1, square_is_filled):
-                    self.cursor.shift_until(-1, square_is_filled)
-                else:
                     self.cursor.shift_until(-1, square_not_filled)
+                else:
+                    self.cursor.shift_until(-1, square_is_filled, False)
                 
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
@@ -244,9 +243,9 @@ class PygameGUI(CrosswordEditor):
             case pygame.K_DOWN:
                 self.cursor.going_down = True
                 if self.cursor.check(1, square_is_filled):
-                    self.cursor.shift_until(1, square_is_filled)
-                else:
                     self.cursor.shift_until(1, square_not_filled)
+                else:
+                    self.cursor.shift_until(1, square_is_filled, False)
                 
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
@@ -255,9 +254,9 @@ class PygameGUI(CrosswordEditor):
             case pygame.K_LEFT:
                 self.cursor.going_down = False
                 if self.cursor.check(-1, square_is_filled):
-                    self.cursor.shift_until(-1, square_is_filled)
-                else:
                     self.cursor.shift_until(-1, square_not_filled)
+                else:
+                    self.cursor.shift_until(-1, square_is_filled, False)
                 
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
@@ -266,9 +265,9 @@ class PygameGUI(CrosswordEditor):
             case pygame.K_RIGHT:
                 self.cursor.going_down = False
                 if self.cursor.check(1, square_is_filled):
-                    self.cursor.shift_until(1, square_is_filled)
-                else:
                     self.cursor.shift_until(1, square_not_filled)
+                else:
+                    self.cursor.shift_until(1, square_is_filled, False)
                 
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
@@ -297,8 +296,9 @@ class PygameGUI(CrosswordEditor):
                     highlight[*index].colour = self.theme.highlight
                     highlight[*index].selected = True
         
-        highlight[*self.cursor.position()].colour = self.theme.cursor_colour
-        highlight[*self.cursor.position()].selected = True
+        if self.mode not in [EditorModes.PREVIEW, EditorModes.HINTS]:
+            highlight[*self.cursor.position()].colour = self.theme.cursor_colour
+            highlight[*self.cursor.position()].selected = True
         
         return highlight
     

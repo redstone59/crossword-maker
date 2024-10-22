@@ -60,17 +60,18 @@ class Cursor:
 
         return False
 
-    def shift_until(self, delta: int, condition: Callable[[int, int], bool]):
+    def shift_until(self, delta: int, condition: Callable[[int, int], bool], revert_on_edge = True):
         last_valid_square = self.position()
         while True:
             self._shift(delta)
             
             if not position_in_bounds(self.position(), self.edges):
-                self.row, self.column = last_valid_square
+                if revert_on_edge:
+                    self.row, self.column = last_valid_square
+                else:
+                    self._shift(-delta)
                 break
-            else:
-                last_valid_square = self.position()
             
-            if not condition(*self.position()):
+            if condition(*self.position()):
                 self.confine()
                 break
