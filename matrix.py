@@ -4,16 +4,16 @@ from dataclasses import dataclass
 
 @dataclass
 class SquareContents:
+    colour: tuple[int, int, int]
     character: str = " "
-    colour: str = "white"
     filled: bool = False
     
     def __str__(self):
         return self.character
 
 class Matrix:
-    def __init__(self, rows: int, columns: int):
-        self.contents = [[SquareContents()] * columns] * rows
+    def __init__(self, rows: int, columns: int, colour: tuple[int, int, int] = (0, 0, 0)):
+        self.contents = [[SquareContents(colour)] * columns] * rows
         self.contents = [deepcopy([deepcopy(item) for item in row]) for row in self.contents]
         self.dimensions = (rows, columns)
     

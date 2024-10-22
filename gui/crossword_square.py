@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from matrix import Matrix, SquareContents
+from app_theme import AppTheme
 
 from typing import *
 import pygame
@@ -10,6 +11,7 @@ class CrosswordSquare:
     position: pygame.Vector2
     size: int | float
     contents: SquareContents
+    theme: AppTheme
     font: pygame.font.Font
     
     def new(surface: pygame.Surface, 
@@ -21,11 +23,11 @@ class CrosswordSquare:
     def draw(self) -> None:
         rect = pygame.Rect(self.position[0], self.position[1], self.size, self.size)
         pygame.draw.rect(self.surface,
-                         "black" if self.contents.filled else self.contents.colour,
+                         self.theme.cw_fill if self.contents.filled else self.contents.colour,
                          rect,
                          )
         pygame.draw.rect(self.surface,
-                         "black",
+                         self.theme.cw_fill,
                          rect,
                          width = self.size // 30
                          )
@@ -39,7 +41,7 @@ class CrosswordSquare:
 class RenderedMatrix:
     matrix: Matrix
     surface: pygame.Surface
-    font_name: str
+    theme: AppTheme
     location: float = 0.5
     
     def draw(self):
@@ -50,7 +52,7 @@ class RenderedMatrix:
         square_size = shortest_side // self.matrix.dimensions[1]
         
         font_size = square_size * 8 // 10
-        font = pygame.font.SysFont(self.font_name, font_size)
+        font = pygame.font.SysFont(self.theme.cw_font, font_size)
         
         starting_position = pygame.Vector2(int((longest_side - shortest_side) * self.location), 0)
         current_row = 0
@@ -64,7 +66,7 @@ class RenderedMatrix:
                     position,
                     square_size,
                     square,
-                    font
+                    self.theme
                 ).draw()
                 current_column += 1
             current_row += 1
