@@ -43,6 +43,17 @@ class Cursor:
             return True
 
         return False
+
+    def shift_until(self, delta: int, condition: Callable[[int, int], bool]):
+        while True:
+            if self.going_down:
+                self.row += delta
+            else:
+                self.column += delta
+            
+            if not (position_in_bounds(self.position(), self.edges) and condition(*self.position())):
+                self.confine()
+                break
     
     def change_position(self, delta_x, delta_y):
         self.row += delta_x
@@ -117,6 +128,7 @@ class PygameGUI(CrosswordEditor):
         ctrl_pressed = event.dict["mod"] & pygame.KMOD_CTRL > 0
         
         square_not_filled = lambda x, y: not self.matrix[x, y].filled
+        square_is_filled = lambda x, y: self.matrix[x, y].filled
         
         if in_normal_mode and not ctrl_pressed and typed_letter:
             self.matrix[*self.cursor.position()].character = event.dict["unicode"]
@@ -160,17 +172,29 @@ class PygameGUI(CrosswordEditor):
             # Movement
             
             case pygame.K_UP:
-                self.cursor.change_position(-1, 0)
-                self.cursor.going_down = True
+                if in_normal_mode:
+                    self.cursor.going_down = True
+                    self.cursor.shift_until(-1, square_is_filled)
+                else:
+                    self.cursor.change_position(-1, 0)
             case pygame.K_DOWN:
-                self.cursor.change_position(1, 0)
-                self.cursor.going_down = True
+                if in_normal_mode:
+                    self.cursor.going_down = True
+                    self.cursor.shift_until(1, square_is_filled)
+                else:
+                    self.cursor.change_position(1, 0)
             case pygame.K_LEFT:
-                self.cursor.change_position(0, -1)
-                self.cursor.going_down = False
+                if in_normal_mode:
+                    self.cursor.going_down = False
+                    self.cursor.shift_until(-1, square_is_filled)
+                else:
+                    self.cursor.change_position(0, -1)
             case pygame.K_RIGHT:
-                self.cursor.change_position(0, 1)
-                self.cursor.going_down = False
+                if in_normal_mode:
+                    self.cursor.going_down = False
+                    self.cursor.shift_until(1, square_is_filled)
+                else:
+                    self.cursor.change_position(0, 1)
             
             # Fallthrough
             
