@@ -17,6 +17,11 @@ class Matrix:
         self.contents = [deepcopy([deepcopy(item) for item in row]) for row in self.contents]
         self.dimensions = (rows, columns)
     
+    def deep_copy(self) -> Self:
+        cloned_matrix = Matrix(*self.dimensions)
+        cloned_matrix.contents = [deepcopy([deepcopy(item) for item in row]) for row in self.contents]
+        return cloned_matrix
+    
     def get_row(self, index: int):
         return self.contents[index]
 
