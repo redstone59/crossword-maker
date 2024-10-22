@@ -161,12 +161,16 @@ class PygameGUI(CrosswordEditor):
             
             case pygame.K_UP:
                 self.cursor.change_position(-1, 0)
+                self.cursor.going_down = True
             case pygame.K_DOWN:
                 self.cursor.change_position(1, 0)
+                self.cursor.going_down = True
             case pygame.K_LEFT:
                 self.cursor.change_position(0, -1)
+                self.cursor.going_down = False
             case pygame.K_RIGHT:
                 self.cursor.change_position(0, 1)
+                self.cursor.going_down = False
             
             # Fallthrough
             
