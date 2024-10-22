@@ -134,7 +134,7 @@ class PygameGUI(CrosswordEditor):
                     self.matrix[*self.cursor.position()].filled = not self.matrix[*self.cursor.position()].filled
                 if self.mode == EditorModes.FILL:
                     mirrored_position = mirror(self.cursor.position(), self.matrix.dimensions)
-                    self.matrix[*mirrored_position].filled = self.matrix[*mirrored_position]
+                    self.matrix[*mirrored_position].filled = not self.matrix[*mirrored_position].filled
             
             # Fallthrough
             
