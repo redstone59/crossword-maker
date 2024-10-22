@@ -184,7 +184,7 @@ class PygameGUI(CrosswordEditor):
         
         highlighted_matrix = self.highlight_words()
         
-        RenderedMatrix(highlighted_matrix, self.screen, self.theme.cw_font, self.matrix_position).draw()
+        RenderedMatrix(highlighted_matrix, self.screen, self.theme, self.matrix_position).draw()
         
         pygame.display.flip()
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from matrix import Matrix, SquareContents
-from app_theme import AppTheme
+from gui.app_theme import AppTheme
 
 from typing import *
 import pygame

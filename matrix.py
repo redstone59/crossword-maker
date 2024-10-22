@@ -12,7 +12,7 @@ class SquareContents:
         return self.character
 
 class Matrix:
-    def __init__(self, rows: int, columns: int, colour: tuple[int, int, int] = (0, 0, 0)):
+    def __init__(self, rows: int, columns: int, colour: tuple[int, int, int] = (255, 255, 255)):
         self.contents = [[SquareContents(colour)] * columns] * rows
         self.contents = [deepcopy([deepcopy(item) for item in row]) for row in self.contents]
         self.dimensions = (rows, columns)
