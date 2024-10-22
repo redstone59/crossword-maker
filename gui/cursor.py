@@ -12,16 +12,37 @@ class Cursor:
     edges: tuple[int, int] = (0, 0)
     going_down: bool = False
     
-    def confine(self):
-        self.row = clamp(self.row, 0, self.edges[0] - 1)
-        self.column = clamp(self.column, 0, self.edges[1] - 1)
-        
-    def shift(self, delta: int):
+    def _shift(self, delta):
         if self.going_down:
             self.row += delta
         else:
             self.column += delta
-            
+    
+    def confine(self):
+        self.row = clamp(self.row, 0, self.edges[0] - 1)
+        self.column = clamp(self.column, 0, self.edges[1] - 1)
+    
+    def change_position(self, delta_x, delta_y):
+        self.row += delta_x
+        self.column += delta_y
+        self.confine()
+    
+    def check(self, delta: int, func: Callable[[int, int], bool]) -> bool:
+        self._shift(delta)
+        
+        if position_in_bounds(self.position(), self.edges):
+            result = func(*self.position())
+        else:
+            result = False
+        
+        self._shift(-delta)
+        return result
+    
+    def position(self) -> tuple[int, int]:
+        return self.row, self.column
+        
+    def shift(self, delta: int):
+        self._shift(delta)
         self.confine()
     
     def shift_if(self, delta: int, condition: Callable[[int, int], bool]) -> bool:
@@ -40,20 +61,16 @@ class Cursor:
         return False
 
     def shift_until(self, delta: int, condition: Callable[[int, int], bool]):
+        last_valid_square = self.position()
         while True:
-            if self.going_down:
-                self.row += delta
-            else:
-                self.column += delta
+            self._shift(delta)
             
-            if not (position_in_bounds(self.position(), self.edges) and condition(*self.position())):
+            if not position_in_bounds(self.position(), self.edges):
+                self.row, self.column = last_valid_square
+                break
+            else:
+                last_valid_square = self.position()
+            
+            if not condition(*self.position()):
                 self.confine()
                 break
-    
-    def change_position(self, delta_x, delta_y):
-        self.row += delta_x
-        self.column += delta_y
-        self.confine()
-    
-    def position(self) -> tuple[int, int]:
-        return self.row, self.column

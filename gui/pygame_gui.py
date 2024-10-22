@@ -29,7 +29,7 @@ class PygameGUI(CrosswordEditor):
         self.theme = AppTheme()
         
         self.dictionaries = dictionaries
-        self.matrix = Matrix(15, 15, self.theme.cw_background)
+        self.matrix = Matrix(11, 11, self.theme.cw_background)
         self.cursor = Cursor(edges = self.matrix.dimensions)
         self.mode: EditorModes = EditorModes.NORMAL
         self.start_select: tuple[int, int] = (0, 0)
@@ -39,7 +39,7 @@ class PygameGUI(CrosswordEditor):
         self.screen = pygame.display.set_mode((1920, 1080))
         self.clock = pygame.time.Clock()
         self.running = True
-        self.matrix_position = 0.5
+        self.matrix_position = 0 # The crossword renders on the left hand side of the window.
     
     def main_loop(self):
         while self.running:
@@ -99,6 +99,7 @@ class PygameGUI(CrosswordEditor):
 
         if event.dict["unicode"] == "#":
             self.mode = EditorModes.FILL
+            return
 
         match event.dict["key"]:
             case pygame.K_ESCAPE:
@@ -144,6 +145,9 @@ class PygameGUI(CrosswordEditor):
             
             case pygame.K_TAB:
                 self.cursor.going_down = not self.cursor.going_down
+            case pygame.K_f:
+                if self.mode == EditorModes.FILL:
+                    self.cursor.row, self.cursor.column = mirror(self.cursor.position(), self.matrix.dimensions)
             
             case pygame.K_UP:
                 if in_normal_mode:
@@ -228,32 +232,44 @@ class PygameGUI(CrosswordEditor):
             
             case pygame.K_UP:
                 self.cursor.going_down = True
-                self.cursor.shift_until(-1, square_is_filled)
-                self.cursor.shift_until(-1, square_not_filled)
+                if self.cursor.check(-1, square_is_filled):
+                    self.cursor.shift_until(-1, square_is_filled)
+                else:
+                    self.cursor.shift_until(-1, square_not_filled)
+                
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
                     self.cursor.shift(1)
             
             case pygame.K_DOWN:
                 self.cursor.going_down = True
-                self.cursor.shift_until(1, square_is_filled)
-                self.cursor.shift_until(1, square_not_filled)
+                if self.cursor.check(1, square_is_filled):
+                    self.cursor.shift_until(1, square_is_filled)
+                else:
+                    self.cursor.shift_until(1, square_not_filled)
+                
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
                     self.cursor.shift(-1)
             
             case pygame.K_LEFT:
                 self.cursor.going_down = False
-                self.cursor.shift_until(-1, square_is_filled)
-                self.cursor.shift_until(-1, square_not_filled)
+                if self.cursor.check(-1, square_is_filled):
+                    self.cursor.shift_until(-1, square_is_filled)
+                else:
+                    self.cursor.shift_until(-1, square_not_filled)
+                
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
                     self.cursor.shift(1)
             
             case pygame.K_RIGHT:
                 self.cursor.going_down = False
-                self.cursor.shift_until(1, square_is_filled)
-                self.cursor.shift_until(1, square_not_filled)
+                if self.cursor.check(1, square_is_filled):
+                    self.cursor.shift_until(1, square_is_filled)
+                else:
+                    self.cursor.shift_until(1, square_not_filled)
+                
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
                     self.cursor.shift(-1)

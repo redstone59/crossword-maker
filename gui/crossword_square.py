@@ -49,12 +49,14 @@ class RenderedMatrix:
         shortest_side = min(*screen_rect.size)
         longest_side = max(*screen_rect.size)
         
-        square_size = shortest_side // self.matrix.dimensions[1]
+        square_size = shortest_side // max(*self.matrix.dimensions)
         
         font_size = square_size * 8 // 10
         font = pygame.font.SysFont(self.theme.cw_font, font_size)
         
-        starting_position = pygame.Vector2(int((longest_side - shortest_side) * self.location), 0)
+        starting_position = pygame.Vector2(int((longest_side - shortest_side) * self.location),
+                                           0
+                                           )
         current_row = 0
         current_column = 0
         
