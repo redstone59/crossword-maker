@@ -40,6 +40,7 @@ class RenderedMatrix:
     matrix: Matrix
     surface: pygame.Surface
     font_name: str
+    location: float = 0.5
     
     def draw(self):
         screen_rect = self.surface.get_rect()
@@ -51,7 +52,7 @@ class RenderedMatrix:
         font_size = square_size * 8 // 10
         font = pygame.font.SysFont(self.font_name, font_size)
         
-        starting_position = pygame.Vector2((longest_side - shortest_side) // 2, 0)
+        starting_position = pygame.Vector2(int((longest_side - shortest_side) * self.location), 0)
         current_row = 0
         current_column = 0
         
