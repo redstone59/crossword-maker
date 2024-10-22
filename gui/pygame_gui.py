@@ -107,7 +107,7 @@ class PygameGUI(CrosswordEditor):
             # Switching modes
             
             case pygame.K_F1:
-                self.mode = EditorModes.NORMAL
+                self.mode = EditorModes.SELECT
             case pygame.K_F2:
                 self.mode = EditorModes.FILL
             case pygame.K_F3:
@@ -157,6 +157,12 @@ class PygameGUI(CrosswordEditor):
                 self.mode = EditorModes.REBUS
             case pygame.K_f:
                 self.mode = EditorModes.FILTER
+            case pygame.K_v:
+                self.mode = EditorModes.SELECT
+            case pygame.K_s:
+                print("TODO: save crossword here")
+            case pygame.K_e:
+                print("TODO: implement exporters")
             case _:
                 print("Unknown key: " + str(event.dict))
     
