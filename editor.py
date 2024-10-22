@@ -11,6 +11,7 @@ class EditorModes(Enum):
     HINTS   = 4 # well
     REBUS   = 5 # Does not automatically shift square when typing
     PREVIEW = 6 # Removes all answers and places clue numbers on the board
+    SELECT  = 7 # Select a region of the crossword to cut, copy, or paste
 
 class CrosswordEditor:
     def __init__(self, dictionaries: Dict[str, list[str]]):
