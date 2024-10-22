@@ -193,25 +193,73 @@ class PygameGUI(CrosswordEditor):
                 print("Unknown key: " + str(event.dict))
     
     def handle_ctrl_keys(self, event: pygame.event.Event):
+        square_not_filled = lambda x, y: not self.matrix[x, y].filled
+        square_is_filled = lambda x, y: self.matrix[x, y].filled
+        
         match event.dict["key"]:
-            case pygame.K_F2:
-                self.mode = EditorModes.FILL_ASYMMETRICAL
+            # Repositioning board
+            
             case pygame.K_q:
                 self.matrix_position -= 0.5
                 self.matrix_position = clamp(self.matrix_position, 0, 1)
             case pygame.K_w:
                 self.matrix_position += 0.5
                 self.matrix_position = clamp(self.matrix_position, 0, 1)
+                
+            # Changing modes
+            
+            case pygame.K_F2:
+                self.mode = EditorModes.FILL_ASYMMETRICAL
             case pygame.K_r:
                 self.mode = EditorModes.REBUS
             case pygame.K_f:
                 self.mode = EditorModes.FILTER
             case pygame.K_v:
                 self.mode = EditorModes.SELECT
+            
+            # File options
+            
             case pygame.K_s:
                 print("TODO: save crossword here")
             case pygame.K_e:
                 print("TODO: implement exporters")
+                
+            # Faster moving
+            
+            case pygame.K_UP:
+                self.cursor.going_down = True
+                self.cursor.shift_until(-1, square_is_filled)
+                self.cursor.shift_until(-1, square_not_filled)
+                if self.matrix[*self.cursor.position()].filled:
+                    # Place cursor outside of filled square.
+                    self.cursor.shift(1)
+            
+            case pygame.K_DOWN:
+                self.cursor.going_down = True
+                self.cursor.shift_until(1, square_is_filled)
+                self.cursor.shift_until(1, square_not_filled)
+                if self.matrix[*self.cursor.position()].filled:
+                    # Place cursor outside of filled square.
+                    self.cursor.shift(-1)
+            
+            case pygame.K_LEFT:
+                self.cursor.going_down = False
+                self.cursor.shift_until(-1, square_is_filled)
+                self.cursor.shift_until(-1, square_not_filled)
+                if self.matrix[*self.cursor.position()].filled:
+                    # Place cursor outside of filled square.
+                    self.cursor.shift(1)
+            
+            case pygame.K_RIGHT:
+                self.cursor.going_down = False
+                self.cursor.shift_until(1, square_is_filled)
+                self.cursor.shift_until(1, square_not_filled)
+                if self.matrix[*self.cursor.position()].filled:
+                    # Place cursor outside of filled square.
+                    self.cursor.shift(-1)
+            
+            # Fallthrough
+            
             case _:
                 print("Unknown key: " + str(event.dict))
     
