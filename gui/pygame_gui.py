@@ -7,6 +7,9 @@ from gui.cursor import Cursor
 from typing import *
 import pygame
 
+FILL_MODES = [EditorModes.FILL, EditorModes.FILL_ASYMMETRICAL]
+TYPING_MODES = [EditorModes.NORMAL, EditorModes.REBUS, EditorModes.HINTS, EditorModes.FILTER]
+
 def mirror(position: tuple[int, int], edges: tuple[int, int]) -> tuple[int, int]:
     return (edges[0] - position[0] - 1, edges[1] - position[1] - 1)
 
@@ -15,7 +18,7 @@ class PygameGUI(CrosswordEditor):
         self.theme = AppTheme()
         
         self.dictionaries = dictionaries
-        self.matrix = Matrix(12, 12, self.theme.cw_background)
+        self.matrix = Matrix(9, 9, self.theme.cw_background)
         self.cursor = Cursor(edges = self.matrix.dimensions)
         self.mode: EditorModes = EditorModes.NORMAL
         
@@ -54,16 +57,24 @@ class PygameGUI(CrosswordEditor):
                     self.handle_key(event)
     
     def handle_key(self, event: pygame.event.Event):
-        in_normal_mode = self.mode == EditorModes.NORMAL
+        can_type = self.mode in [EditorModes.NORMAL, EditorModes.REBUS]
         typed_letter = event.dict["unicode"].isalnum()
         ctrl_pressed = event.dict["mod"] & pygame.KMOD_CTRL > 0
+
+        in_normal_mode = self.mode == EditorModes.NORMAL
         
         square_not_filled = lambda x, y: not self.matrix[x, y].filled
         square_is_filled = lambda x, y: self.matrix[x, y].filled
         
-        if in_normal_mode and not ctrl_pressed and typed_letter:
-            self.matrix[*self.cursor.position()].character = event.dict["unicode"]
-            self.cursor.shift_if(1, square_not_filled)
+        if can_type and not ctrl_pressed and typed_letter:
+            if in_normal_mode:
+                self.matrix[*self.cursor.position()].character = event.dict["unicode"]
+                self.cursor.shift_if(1, square_not_filled)
+            else:
+                if self.matrix[*self.cursor.position()].character.isspace():
+                    self.matrix[*self.cursor.position()].character = ""
+                    
+                self.matrix[*self.cursor.position()].character += event.dict["unicode"]
             return
 
         if ctrl_pressed:
@@ -130,10 +141,11 @@ class PygameGUI(CrosswordEditor):
             # Filling in squares
             
             case pygame.K_SPACE | pygame.K_RETURN:
-                if self.mode in [EditorModes.FILL, EditorModes.FILL_ASYMMETRICAL]:
+                if self.mode in FILL_MODES:
                     self.matrix[*self.cursor.position()].filled = not self.matrix[*self.cursor.position()].filled
                 if self.mode == EditorModes.FILL:
                     mirrored_position = mirror(self.cursor.position(), self.matrix.dimensions)
+                    if mirrored_position == self.cursor.position(): return
                     self.matrix[*mirrored_position].filled = not self.matrix[*mirrored_position].filled
             
             # Fallthrough
@@ -142,10 +154,9 @@ class PygameGUI(CrosswordEditor):
                 print("Unknown key: " + str(event.dict))
     
     def handle_ctrl_keys(self, event: pygame.event.Event):
-        if event.dict["unicode"] == "":
-            return
-        
         match event.dict["key"]:
+            case pygame.K_F2:
+                self.mode = EditorModes.FILL_ASYMMETRICAL
             case pygame.K_q:
                 self.matrix_position -= 0.5
                 self.matrix_position = clamp(self.matrix_position, 0, 1)
@@ -168,7 +179,7 @@ class PygameGUI(CrosswordEditor):
     def highlight_words(self) -> Matrix:
         highlight = self.matrix.deep_copy()
         
-        not_editing_board = self.mode in [EditorModes.NORMAL, EditorModes.HINTS, EditorModes.FILTER]
+        not_editing_board = self.mode in TYPING_MODES
         if not_editing_board:
             self.fill_until_edge(highlight, 1)
             self.fill_until_edge(highlight, -1)
