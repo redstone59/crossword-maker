@@ -66,7 +66,8 @@ class RenderedMatrix:
                     position,
                     square_size,
                     square,
-                    self.theme
+                    self.theme,
+                    font
                 ).draw()
                 current_column += 1
             current_row += 1
