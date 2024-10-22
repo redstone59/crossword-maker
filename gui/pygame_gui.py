@@ -12,8 +12,10 @@ def mirror(position: tuple[int, int], edges: tuple[int, int]) -> tuple[int, int]
 
 class PygameGUI(CrosswordEditor):
     def __init__(self, dictionaries: Dict[str, list[str]]):
+        self.theme = AppTheme()
+        
         self.dictionaries = dictionaries
-        self.matrix = Matrix(12, 12)
+        self.matrix = Matrix(12, 12, self.theme.cw_background)
         self.cursor = Cursor(edges = self.matrix.dimensions)
         self.mode: EditorModes = EditorModes.NORMAL
         
@@ -23,8 +25,6 @@ class PygameGUI(CrosswordEditor):
         self.clock = pygame.time.Clock()
         self.running = True
         self.matrix_position = 0.5
-        
-        self.theme = AppTheme()
     
     def main_loop(self):
         while self.running:

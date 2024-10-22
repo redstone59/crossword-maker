@@ -32,7 +32,7 @@ class CrosswordSquare:
                          width = self.size // 30
                          )
         
-        text = self.font.render(self.contents.character.upper(), False, "black")
+        text = self.font.render(self.contents.character.upper(), False, self.theme.cw_text)
         self.surface.blit(text,
                           text.get_rect(center = rect.center)
                           )
