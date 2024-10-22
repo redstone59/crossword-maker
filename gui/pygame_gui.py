@@ -11,6 +11,9 @@ import pygame
 def position_in_bounds(a: tuple[int, int], b: tuple[int, int]) -> bool:
     return (0 <= a[0] < b[0]) and (0 <= a[1] < b[1])
 
+def mirror(position: tuple[int, int], edges: tuple[int, int]) -> tuple[int, int]:
+    return (edges[0] - position[0] - 1, edges[1] - position[1] - 1)
+
 @dataclass
 class Cursor:
     row: int = 0
@@ -93,7 +96,7 @@ class PygameGUI(CrosswordEditor):
         current_cursor_position = self.cursor.position()
         
         while True:
-            to_highlight[*self.cursor.position()].colour = self.theme.highlighted_word
+            to_highlight[*self.cursor.position()].colour = self.theme.highlight
             if not self.cursor.shift_if(delta, lambda x, y: not to_highlight[x, y].filled):
                 break
         
@@ -124,8 +127,8 @@ class PygameGUI(CrosswordEditor):
             self.handle_ctrl_keys(event)
             return
 
-        if event.dict["unicode"] == "#": # temporary measure
-            self.matrix[*self.cursor.position()].filled = not self.matrix[*self.cursor.position()].filled
+        if event.dict["unicode"] == "#":
+            self.mode = EditorModes.FILL
 
         match event.dict["key"]:
             case pygame.K_ESCAPE:
@@ -181,6 +184,15 @@ class PygameGUI(CrosswordEditor):
                 else:
                     self.cursor.change_position(0, 1)
             
+            # Filling in squares
+            
+            case pygame.K_SPACE | pygame.K_RETURN:
+                if self.mode in [EditorModes.FILL, EditorModes.FILL_ASYMMETRICAL]:
+                    self.matrix[*self.cursor.position()].filled = not self.matrix[*self.cursor.position()].filled
+                if self.mode == EditorModes.FILL:
+                    mirrored_position = mirror(self.cursor.position(), self.matrix.dimensions)
+                    self.matrix[*mirrored_position].filled = self.matrix[*mirrored_position]
+            
             # Fallthrough
             
             case _:
@@ -213,9 +225,13 @@ class PygameGUI(CrosswordEditor):
     def highlight_words(self) -> Matrix:
         highlight = self.matrix.deep_copy()
         
-        self.fill_until_edge(highlight, 1)
-        self.fill_until_edge(highlight, -1)
-        
+        not_editing_board = self.mode in [EditorModes.NORMAL, EditorModes.HINTS, EditorModes.FILTER]
+        if not_editing_board:
+            self.fill_until_edge(highlight, 1)
+            self.fill_until_edge(highlight, -1)
+        elif self.mode == EditorModes.FILL:
+            mirrored_position = mirror(self.cursor.position(), self.matrix.dimensions)
+            highlight[*mirrored_position].colour = self.theme.highlight
         highlight[*self.cursor.position()].colour = self.theme.cursor_colour
         
         return highlight

@@ -15,4 +15,4 @@ class AppTheme:
     # Other visual elements
     app_background: Colour = (70, 70, 80)
     cursor_colour: Colour = (255, 218, 0)
-    highlighted_word: Colour = (167, 216, 255)
+    highlight: Colour = (167, 216, 255)
