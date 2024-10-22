@@ -105,7 +105,12 @@ class PygameGUI(CrosswordEditor):
             case pygame.K_BACKSPACE:
                 if self.matrix[*self.cursor.position()].character.isspace():
                     self.cursor.shift_if(-1, square_not_filled)
-                self.matrix[*self.cursor.position()].character = " "
+                
+                has_multiple_characters = len(self.matrix[*self.cursor.position()].character) > 1
+                if has_multiple_characters:
+                    self.matrix[*self.cursor.position()].character = self.matrix[*self.cursor.position()].character[:-1]
+                else:
+                    self.matrix[*self.cursor.position()].character = " "
             case pygame.K_DELETE:
                 self.matrix[*self.cursor.position()].character = " "
             case pygame.K_TAB:
@@ -147,6 +152,10 @@ class PygameGUI(CrosswordEditor):
                     mirrored_position = mirror(self.cursor.position(), self.matrix.dimensions)
                     if mirrored_position == self.cursor.position(): return
                     self.matrix[*mirrored_position].filled = not self.matrix[*mirrored_position].filled
+                    return
+                
+                if self.mode in TYPING_MODES:
+                    print("TODO: toggle between hints (like hitting tab on nyt)")
             
             # Fallthrough
             
