@@ -7,6 +7,9 @@ from dataclasses import dataclass
 
 import pygame
 
+def position_in_bounds(a: tuple[int, int], b: tuple[int, int]) -> bool:
+    return (0 <= a[0] < b[0]) and (0 <= a[1] < b[1])
+
 @dataclass
 class Cursor:
     row: int = 0
@@ -32,7 +35,7 @@ class Cursor:
         else:
             next_position = (self.row, self.column + delta)
         
-        if next_position[0] >= self.edges[0] or next_position[1] >= self.edges[1]:
+        if not position_in_bounds(next_position, self.edges):
             return False
         
         if condition(*next_position):
@@ -90,6 +93,16 @@ class PygameGUI(CrosswordEditor):
         pygame.key.stop_text_input()
         pygame.quit()
     
+    def fill_until_edge(self, to_highlight: Matrix, delta: int):
+        current_cursor_position = self.cursor.position()
+        
+        while True:
+            to_highlight[*self.cursor.position()].colour = self.theme.highlighted_word
+            if not self.cursor.shift_if(delta, lambda x, y: not to_highlight[x, y].filled):
+                break
+        
+        self.cursor.row, self.cursor.column = current_cursor_position
+            
     def handle_events(self):
         for event in pygame.event.get():
             match event.type:
@@ -103,9 +116,11 @@ class PygameGUI(CrosswordEditor):
         typed_letter = event.dict["unicode"].isalnum()
         ctrl_pressed = event.dict["mod"] & pygame.KMOD_CTRL > 0
         
+        square_not_filled = lambda x, y: not self.matrix[x, y].filled
+        
         if in_normal_mode and not ctrl_pressed and typed_letter:
             self.matrix[*self.cursor.position()].character = event.dict["unicode"]
-            self.cursor.shift_if(1, lambda x, y: not self.matrix[x, y].filled)
+            self.cursor.shift_if(1, square_not_filled)
             return
 
         if ctrl_pressed:
@@ -135,7 +150,7 @@ class PygameGUI(CrosswordEditor):
             
             case pygame.K_BACKSPACE:
                 if self.matrix[*self.cursor.position()].character.isspace():
-                    self.cursor.shift(-1)
+                    self.cursor.shift_if(-1, square_not_filled)
                 self.matrix[*self.cursor.position()].character = " "
             case pygame.K_DELETE:
                 self.matrix[*self.cursor.position()].character = " "
@@ -184,6 +199,9 @@ class PygameGUI(CrosswordEditor):
     
     def highlight_words(self) -> Matrix:
         highlight = self.matrix.deep_copy()
+        
+        self.fill_until_edge(highlight, 1)
+        self.fill_until_edge(highlight, -1)
         
         highlight[*self.cursor.position()].colour = self.theme.cursor_colour
         
