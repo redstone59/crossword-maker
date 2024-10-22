@@ -27,7 +27,7 @@ class CrosswordSquare:
                          rect,
                          )
         pygame.draw.rect(self.surface,
-                         self.theme.cw_fill,
+                         self.contents.colour if self.contents.filled and self.contents.selected else self.theme.cw_fill,
                          rect,
                          width = self.size // 30
                          )

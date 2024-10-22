@@ -7,6 +7,7 @@ class SquareContents:
     colour: tuple[int, int, int]
     character: str = " "
     filled: bool = False
+    selected: bool = False
     
     def __str__(self):
         return self.character
