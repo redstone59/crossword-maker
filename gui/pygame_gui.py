@@ -92,6 +92,8 @@ class PygameGUI(CrosswordEditor):
                 if self.matrix[*self.cursor.position()].character.isspace():
                     self.cursor.shift(-1)
                 self.matrix[*self.cursor.position()].character = " "
+            case pygame.K_DELETE:
+                self.matrix[*self.cursor.position()].character = " "
             case pygame.K_TAB:
                 self.cursor.going_down = not self.cursor.going_down
             case pygame.K_UP:
