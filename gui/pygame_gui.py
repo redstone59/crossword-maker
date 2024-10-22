@@ -49,6 +49,22 @@ class Cursor:
     def position(self) -> tuple[int, int]:
         return self.row, self.column
 
+Colour = tuple[int, int, int]
+
+@dataclass
+class AppTheme:
+    # Crossword default colours (exported)
+    cw_background: Colour = (255, 255, 255)
+    cw_text: Colour = (0, 0, 0)
+    cw_accent: Colour = (200, 200, 200) # For pointing out extra messages
+    cw_fill: Colour = (0, 0, 0)
+    cw_font: str = "arial"
+    
+    # Other visual elements
+    app_background: Colour = (70, 70, 80)
+    cursor_colour: Colour = (255, 218, 0)
+    highlighted_word: Colour = (167, 216, 255)
+
 class PygameGUI(CrosswordEditor):
     def __init__(self, dictionaries: Dict[str, list[str]]):
         self.dictionaries = dictionaries
@@ -63,7 +79,7 @@ class PygameGUI(CrosswordEditor):
         self.running = True
         self.matrix_position = 0.5
         
-        self.font = "arial"
+        self.theme = AppTheme()
     
     def main_loop(self):
         while self.running:
@@ -166,15 +182,19 @@ class PygameGUI(CrosswordEditor):
             case _:
                 print("Unknown key: " + str(event.dict))
     
+    def highlight_words(self) -> Matrix:
+        highlight = self.matrix.deep_copy()
+        
+        highlight[*self.cursor.position()].colour = self.theme.cursor_colour
+        
+        return highlight
+    
     def render_graphics(self):
-        self.screen.fill((70, 70, 80)) # Remove anything on buffer
+        self.screen.fill(self.theme.app_background) # Remove anything on buffer
         
-        previous_colour = self.matrix[*self.cursor.position()].colour
-        self.matrix[*self.cursor.position()].colour = (180, 180, 180)
+        highlighted_matrix = self.highlight_words()
         
-        RenderedMatrix(self.matrix, self.screen, self.font, self.matrix_position).draw()
-        
-        self.matrix[*self.cursor.position()].colour = previous_colour
+        RenderedMatrix(highlighted_matrix, self.screen, self.theme.cw_font, self.matrix_position).draw()
         
         pygame.display.flip()
 
