@@ -61,13 +61,19 @@ class RenderedMatrix:
         for row in self.matrix.contents:
             for square in row:
                 position = starting_position + pygame.Vector2(current_column, current_row) * square_size
+                if len(square.character) > 1:
+                    font_size = square_size * 8 // (10 * len(square.character))
+                    square_font = pygame.font.SysFont(self.theme.cw_font, font_size)
+                else:
+                    square_font = font
+                
                 CrosswordSquare(
                     self.surface,
                     position,
                     square_size,
                     square,
                     self.theme,
-                    font
+                    square_font
                 ).draw()
                 current_column += 1
             current_row += 1
