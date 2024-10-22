@@ -103,6 +103,9 @@ class PygameGUI(CrosswordEditor):
             case pygame.K_ESCAPE:
                 if not in_normal_mode:
                     self.mode = EditorModes.NORMAL
+                    
+            # Switching modes
+            
             case pygame.K_F1:
                 self.mode = EditorModes.NORMAL
             case pygame.K_F2:
@@ -111,6 +114,9 @@ class PygameGUI(CrosswordEditor):
                 self.mode = EditorModes.HINTS
             case pygame.K_F4:
                 self.mode = EditorModes.PREVIEW
+                
+            # Removing text
+            
             case pygame.K_BACKSPACE:
                 if self.matrix[*self.cursor.position()].character.isspace():
                     self.cursor.shift(-1)
@@ -119,6 +125,9 @@ class PygameGUI(CrosswordEditor):
                 self.matrix[*self.cursor.position()].character = " "
             case pygame.K_TAB:
                 self.cursor.going_down = not self.cursor.going_down
+                
+            # Movement
+            
             case pygame.K_UP:
                 self.cursor.change_position(-1, 0)
             case pygame.K_DOWN:
@@ -127,6 +136,9 @@ class PygameGUI(CrosswordEditor):
                 self.cursor.change_position(0, -1)
             case pygame.K_RIGHT:
                 self.cursor.change_position(0, 1)
+            
+            # Fallthrough
+            
             case _:
                 print("Unknown key: " + str(event.dict))
     
