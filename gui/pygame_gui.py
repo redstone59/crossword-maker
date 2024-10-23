@@ -106,7 +106,7 @@ class PygameGUI(CrosswordEditor):
     def refresh_words(self):
         across_string, down_string = find_cursor_words(self.matrix, self.cursor.position())
         
-        waste_of_time = lambda word: len(word) < 3 or word.count(" ") >= 5
+        waste_of_time = lambda word: len(word) < 3 or word.isspace() or word.count(" ") >= 5
         
         across_words = {} if waste_of_time(across_string) else self.find_all_words(across_string, " ")
         down_words = {} if waste_of_time(down_string) else self.find_all_words(down_string, " ")
