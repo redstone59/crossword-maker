@@ -24,6 +24,40 @@ def get_all_points(a: tuple[int, int], b: tuple[int, int]) -> list[tuple[int, in
 def mirror(position: tuple[int, int], edges: tuple[int, int]) -> tuple[int, int]:
     return (edges[0] - position[0] - 1, edges[1] - position[1] - 1)
 
+def isolate_word(index: int, squares: list[SquareContents]) -> list[SquareContents]:
+    end = None
+    for offset in range(len(squares) - index):
+        if not squares[index + offset].filled:
+            continue
+        
+        end = index + offset
+        break
+    
+    if end == None:
+        end = len(squares)
+    
+    start = None
+    for offset in range(index):
+        if not squares[index - offset - 1].filled:
+            continue
+        
+        start = index - offset
+        break
+    
+    if start == None:
+        start = 0
+    
+    return squares[start:end]
+
+def find_cursor_words(matrix: Matrix, position: tuple[int, int]) -> tuple[str, str]:
+    if matrix[*position].filled: return "", ""
+    
+    row, column = matrix.get_row(position[0]), matrix.get_column(position[1])
+    row_string = "".join([square.character for square in isolate_word(position[1], row)])
+    column_string = "".join([square.character for square in isolate_word(position[0], column)])
+    
+    return row_string, column_string
+
 class PygameGUI(CrosswordEditor):
     def __init__(self, dictionaries: Dict[str, list[str]]):
         self.theme = AppTheme()
@@ -44,7 +78,8 @@ class PygameGUI(CrosswordEditor):
     def main_loop(self):
         while self.running:
             self.handle_events()
-            self.render_graphics()
+            self.find_words()
+            self.render_crossword()
             self.clock.tick(60)
         
         pygame.key.stop_text_input()
@@ -63,7 +98,11 @@ class PygameGUI(CrosswordEditor):
                 break
         
         self.cursor.row, self.cursor.column = current_cursor_position
-            
+    
+    def find_words(self):
+        across_string, down_string = find_cursor_words(self.matrix, self.cursor.position())
+        print(f"'{across_string}', '{down_string}'")
+    
     def handle_events(self):
         for event in pygame.event.get():
             match event.type:
@@ -302,7 +341,7 @@ class PygameGUI(CrosswordEditor):
         
         return highlight
     
-    def render_graphics(self):
+    def render_crossword(self):
         self.screen.fill(self.theme.app_background) # Remove anything on buffer
         
         highlighted_matrix = self.highlight_matrix()
