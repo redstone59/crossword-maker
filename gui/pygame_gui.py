@@ -239,14 +239,16 @@ class PygameGUI(CrosswordEditor):
         square_is_filled = lambda x, y: self.matrix[x, y].filled
         
         match event.dict["key"]:
-            # Repositioning board
-            
-            case pygame.K_q:
-                self.matrix_position -= 0.5
-                self.matrix_position = clamp(self.matrix_position, 0, 1)
+            # Common shortcuts
+
+            case pygame.K_c:
+                pass
+            case pygame.K_x:
+                pass
+            case pygame.K_v:
+                pass
             case pygame.K_w:
-                self.matrix_position += 0.5
-                self.matrix_position = clamp(self.matrix_position, 0, 1)
+                self.running = False
                 
             # Changing modes
             
