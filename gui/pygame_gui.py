@@ -1,5 +1,6 @@
 from editor import CrosswordEditor, EditorModes, clamp
 from matrix import Matrix, SquareContents
+from word_filter import create_filter
 from gui.crossword_square import RenderedMatrix
 from gui.app_theme import AppTheme
 from gui.cursor import Cursor
@@ -62,11 +63,12 @@ class PygameGUI(CrosswordEditor):
     def __init__(self, dictionaries: Dict[str, list[str]]):
         self.theme = AppTheme()
         
-        self.dictionaries = dictionaries
+        self.find_all_words = create_filter(dictionaries)
         self.matrix = Matrix(11, 11, self.theme.cw_background)
         self.cursor = Cursor(edges = self.matrix.dimensions)
         self.mode: EditorModes = EditorModes.NORMAL
         self.start_select: tuple[int, int] = (0, 0)
+        self.has_moved: bool = False
         
         pygame.init()
         pygame.key.start_text_input()
@@ -78,8 +80,10 @@ class PygameGUI(CrosswordEditor):
     def main_loop(self):
         while self.running:
             self.handle_events()
-            self.find_words()
-            self.render_crossword()
+            if self.has_moved:
+                self.refresh_words()
+                self.has_moved = False
+            self.render_all()
             self.clock.tick(60)
         
         pygame.key.stop_text_input()
@@ -99,9 +103,16 @@ class PygameGUI(CrosswordEditor):
         
         self.cursor.row, self.cursor.column = current_cursor_position
     
-    def find_words(self):
+    def refresh_words(self):
         across_string, down_string = find_cursor_words(self.matrix, self.cursor.position())
-        print(f"'{across_string}', '{down_string}'")
+        
+        waste_of_time = lambda word: len(word) < 3 or word.count(" ") >= 5
+        
+        across_words = {} if waste_of_time(across_string) else self.find_all_words(across_string, " ")
+        down_words = {} if waste_of_time(down_string) else self.find_all_words(down_string, " ")
+        
+        print(across_words)
+        
     
     def handle_events(self):
         for event in pygame.event.get():
@@ -193,6 +204,8 @@ class PygameGUI(CrosswordEditor):
                     self.cursor.shift_until(-1, square_not_filled)
                 else:
                     self.cursor.change_position(-1, 0)
+                
+                self.has_moved = True
                     
             case pygame.K_DOWN:
                 if in_normal_mode:
@@ -200,6 +213,8 @@ class PygameGUI(CrosswordEditor):
                     self.cursor.shift_until(1, square_not_filled)
                 else:
                     self.cursor.change_position(1, 0)
+                
+                self.has_moved = True
                     
             case pygame.K_LEFT:
                 if in_normal_mode:
@@ -207,6 +222,8 @@ class PygameGUI(CrosswordEditor):
                     self.cursor.shift_until(-1, square_not_filled)
                 else:
                     self.cursor.change_position(0, -1)
+                
+                self.has_moved = True
                     
             case pygame.K_RIGHT:
                 if in_normal_mode:
@@ -214,6 +231,8 @@ class PygameGUI(CrosswordEditor):
                     self.cursor.shift_until(1, square_not_filled)
                 else:
                     self.cursor.change_position(0, 1)
+                
+                self.has_moved = True
             
             # Filling in squares
             
@@ -280,6 +299,8 @@ class PygameGUI(CrosswordEditor):
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
                     self.cursor.shift(1)
+                
+                self.has_moved = True
             
             case pygame.K_DOWN:
                 self.cursor.going_down = True
@@ -291,6 +312,8 @@ class PygameGUI(CrosswordEditor):
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
                     self.cursor.shift(-1)
+                
+                self.has_moved = True
             
             case pygame.K_LEFT:
                 self.cursor.going_down = False
@@ -302,6 +325,8 @@ class PygameGUI(CrosswordEditor):
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
                     self.cursor.shift(1)
+                
+                self.has_moved = True
             
             case pygame.K_RIGHT:
                 self.cursor.going_down = False
@@ -313,6 +338,8 @@ class PygameGUI(CrosswordEditor):
                 if self.matrix[*self.cursor.position()].filled:
                     # Place cursor outside of filled square.
                     self.cursor.shift(-1)
+                
+                self.has_moved = True
             
             # Fallthrough
             
@@ -343,14 +370,20 @@ class PygameGUI(CrosswordEditor):
         
         return highlight
     
-    def render_crossword(self):
+    def render_all(self):
         self.screen.fill(self.theme.app_background) # Remove anything on buffer
-        
-        highlighted_matrix = self.highlight_matrix()
-        
-        RenderedMatrix(highlighted_matrix, self.screen, self.theme, self.matrix_position).draw()
-        
+
+        self.render_crossword()
+        self.render_words()
+    
         pygame.display.flip()
+    
+    def render_crossword(self):
+        highlighted_matrix = self.highlight_matrix()
+        RenderedMatrix(highlighted_matrix, self.screen, self.theme, self.matrix_position).draw()
+
+    def render_words(self):
+        pass
 
     def update_dimensions(self, new_rows: int, new_columns: int):
         self.matrix = Matrix(new_rows, new_columns)
