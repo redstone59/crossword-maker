@@ -68,7 +68,7 @@ class PygameGUI(CrosswordEditor):
         self.cursor = Cursor(edges = self.matrix.dimensions)
         self.mode: EditorModes = EditorModes.NORMAL
         self.start_select: tuple[int, int] = (0, 0)
-        self.has_moved: bool = False
+        self.needs_refresh: bool = False
         
         pygame.init()
         pygame.key.start_text_input()
@@ -80,9 +80,9 @@ class PygameGUI(CrosswordEditor):
     def main_loop(self):
         while self.running:
             self.handle_events()
-            if self.has_moved:
+            if self.needs_refresh:
                 self.refresh_words()
-                self.has_moved = False
+                self.needs_refresh = False
             self.render_all()
             self.clock.tick(60)
         
@@ -205,7 +205,7 @@ class PygameGUI(CrosswordEditor):
                 else:
                     self.cursor.change_position(-1, 0)
                 
-                self.has_moved = True
+                self.needs_refresh = True
                     
             case pygame.K_DOWN:
                 if in_normal_mode:
@@ -214,7 +214,7 @@ class PygameGUI(CrosswordEditor):
                 else:
                     self.cursor.change_position(1, 0)
                 
-                self.has_moved = True
+                self.needs_refresh = True
                     
             case pygame.K_LEFT:
                 if in_normal_mode:
@@ -223,7 +223,7 @@ class PygameGUI(CrosswordEditor):
                 else:
                     self.cursor.change_position(0, -1)
                 
-                self.has_moved = True
+                self.needs_refresh = True
                     
             case pygame.K_RIGHT:
                 if in_normal_mode:
@@ -232,7 +232,7 @@ class PygameGUI(CrosswordEditor):
                 else:
                     self.cursor.change_position(0, 1)
                 
-                self.has_moved = True
+                self.needs_refresh = True
             
             # Filling in squares
             
@@ -300,7 +300,7 @@ class PygameGUI(CrosswordEditor):
                     # Place cursor outside of filled square.
                     self.cursor.shift(1)
                 
-                self.has_moved = True
+                self.needs_refresh = True
             
             case pygame.K_DOWN:
                 self.cursor.going_down = True
@@ -313,7 +313,7 @@ class PygameGUI(CrosswordEditor):
                     # Place cursor outside of filled square.
                     self.cursor.shift(-1)
                 
-                self.has_moved = True
+                self.needs_refresh = True
             
             case pygame.K_LEFT:
                 self.cursor.going_down = False
@@ -326,7 +326,7 @@ class PygameGUI(CrosswordEditor):
                     # Place cursor outside of filled square.
                     self.cursor.shift(1)
                 
-                self.has_moved = True
+                self.needs_refresh = True
             
             case pygame.K_RIGHT:
                 self.cursor.going_down = False
@@ -339,7 +339,7 @@ class PygameGUI(CrosswordEditor):
                     # Place cursor outside of filled square.
                     self.cursor.shift(-1)
                 
-                self.has_moved = True
+                self.needs_refresh = True
             
             # Fallthrough
             
