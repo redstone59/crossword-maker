@@ -1,6 +1,6 @@
 from editor import clamp
 from dataclasses import dataclass
-from typing import *
+from collections.abc import Callable
 
 def position_in_bounds(a: tuple[int, int], b: tuple[int, int]) -> bool:
     return (0 <= a[0] < b[0]) and (0 <= a[1] < b[1])

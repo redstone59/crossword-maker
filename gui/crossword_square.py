@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from matrix import Matrix, SquareContents
 from gui.app_theme import AppTheme
 
-from typing import *
+from typing import Self
 import pygame
 
 @dataclass

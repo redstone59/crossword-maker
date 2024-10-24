@@ -5,8 +5,7 @@ from gui.crossword_square import RenderedMatrix
 from gui.app_theme import AppTheme
 from gui.cursor import Cursor
 
-from typing import *
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import pygame
 
 FILL_MODES = [EditorModes.FILL, EditorModes.FILL_ASYMMETRICAL]
@@ -63,10 +62,10 @@ def find_cursor_words(matrix: Matrix, position: tuple[int, int]) -> tuple[str, s
 @dataclass
 class PreviousWord:
     string: str = ""
-    results: Dict[str, list[str]] = {}
+    results: dict[str, list[str]] = field(default_factory = dict)
 
 class PygameGUI(CrosswordEditor):
-    def __init__(self, dictionaries: Dict[str, list[str]]):
+    def __init__(self, dictionaries: dict[str, list[str]]):
         self.theme = AppTheme()
         
         self.find_all_words = create_filter(dictionaries)
@@ -91,7 +90,7 @@ class PygameGUI(CrosswordEditor):
         while self.running:
             self.handle_events()
             if self.needs_refresh:
-                self.refresh_words()
+                #self.refresh_words()
                 self.needs_refresh = False
             self.render_all()
             self.clock.tick(60)
@@ -118,13 +117,13 @@ class PygameGUI(CrosswordEditor):
         
         waste_of_time = lambda word: len(word) < 3 or word.isspace() or word.count(" ") >= 5
         
-        if self.previous_across.string != across_string:
+        if len(across_string) < 3 or self.previous_across.string != across_string:
             across_words = {} if waste_of_time(across_string) else self.find_all_words(across_string, " ")
             self.previous_across = PreviousWord(across_string, across_words)
         else:
             across_words = self.previous_across.results
         
-        if self.previous_down.string != down_string:
+        if len(down_string) < 3 or self.previous_down.string != down_string:
             down_words = {} if waste_of_time(down_string) else self.find_all_words(down_string, " ")
             self.previous_down = PreviousWord(down_string, down_words)
         else:

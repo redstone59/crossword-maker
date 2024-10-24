@@ -1,8 +1,8 @@
 import regex as re
-from typing import *
+from collections.abc import Callable
 
-def create_filter(dictionaries: Dict[str, list[str]]) -> Callable[[str, str], Dict[str, list[str]]]:
-    def find_all_words(pattern: str, replace_char: str = "*") -> Dict[str, list[str]]:
+def create_filter(dictionaries: dict[str, list[str]]) -> Callable[[str, str], dict[str, list[str]]]:
+    def find_all_words(pattern: str, replace_char: str = "*") -> dict[str, list[str]]:
         all_results = {}
         
         for key in dictionaries:
